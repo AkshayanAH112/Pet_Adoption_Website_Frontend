@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-pet-background text-gray-800;
+}
+
+.btn-primary {
+  @apply bg-pet-primary text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-pet-secondary text-white px-4 py-2 rounded hover:bg-red-600 transition-colors;
+}
+
+.card {
+  @apply bg-white shadow-md rounded-lg p-6 mb-4;
+}
