@@ -120,6 +120,9 @@ const DashboardPage = () => {
     description: ''
   });
   const [image, setImage] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
   useEffect(() => {
     if (user) {
@@ -680,7 +683,7 @@ const DashboardPage = () => {
       >
         <Alert 
           onClose={() => setSnackbarOpen(false)} 
-          severity="success" 
+          severity={snackbarSeverity} 
           sx={{ width: '100%' }}
         >
           {snackbarMessage}

@@ -1,0 +1,36 @@
+/* Print styles for the Adoption Certificate */
+@media print {
+  /* Hide everything except the certificate when printing */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Only show the certificate */
+  .print-section, 
+  .print-section * {
+    visibility: visible;
+  }
+  
+  /* Position the certificate at the top of the page */
+  .print-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Remove any backgrounds that might not print well */
+  .MuiPaper-root {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+  
+  /* Hide buttons and controls */
+  button, 
+  .MuiIconButton-root {
+    display: none !important;
+  }
+}

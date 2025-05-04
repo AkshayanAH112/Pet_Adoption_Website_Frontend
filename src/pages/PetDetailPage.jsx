@@ -11,7 +11,9 @@ import {
   Divider,
   CircularProgress,
   Alert,
-  IconButton
+  IconButton,
+  Modal,
+  Fade
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -21,10 +23,13 @@ import MoodIcon from '@mui/icons-material/Mood';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getPetById, adoptPet, deletePet } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import AdoptionCertificate from '../components/AdoptionCertificate';
 
 const PetImage = styled(Box)(({ theme }) => ({
   width: '100%',
@@ -57,12 +62,15 @@ const PetDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showSuccess } = useNotification();
   const [pet, setPet] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [adoptLoading, setAdoptLoading] = useState(false);
   const [adoptSuccess, setAdoptSuccess] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showCertificate, setShowCertificate] = useState(false);
 
   useEffect(() => {
     const fetchPet = async () => {
@@ -86,9 +94,23 @@ const PetDetailPage = () => {
       setAdoptLoading(true);
       await adoptPet(id);
       setAdoptSuccess(true);
+      
+      // Show confetti animation
+      setShowConfetti(true);
+      
       // Update pet data
       const response = await getPetById(id);
       setPet(response.data);
+      
+      // Show success notification
+      showSuccess(`Congratulations! You've successfully adopted ${pet.name}!`);
+      
+      // Hide confetti after 5 seconds
+      setTimeout(() => {
+        setShowConfetti(false);
+        // Show certificate after confetti
+        setShowCertificate(true);
+      }, 5000);
     } catch (err) {
       console.error('Error adopting pet:', err);
       setError('Failed to adopt pet. Please try again later.');
@@ -318,6 +340,86 @@ const PetDetailPage = () => {
         </Container>
       </Box>
       <Footer />
+      
+      {/* Confetti Animation */}
+      <AnimatePresence>
+        {showConfetti && (
+          <Box
+            component={motion.div}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              pointerEvents: 'none',
+              zIndex: 9999
+            }}
+          >
+            {Array.from({ length: 100 }).map((_, i) => (
+              <Box
+                key={i}
+                component={motion.div}
+                sx={{
+                  position: 'absolute',
+                  width: Math.random() * 20 + 5,
+                  height: Math.random() * 20 + 5,
+                  backgroundColor: ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'][Math.floor(Math.random() * 16)],
+                  borderRadius: '50%',
+                }}
+                initial={{
+                  x: window.innerWidth / 2,
+                  y: window.innerHeight / 2,
+                }}
+                animate={{
+                  x: Math.random() * window.innerWidth,
+                  y: Math.random() * window.innerHeight,
+                  rotate: Math.random() * 360,
+                  opacity: [1, 0.8, 0],
+                }}
+                transition={{
+                  duration: Math.random() * 3 + 2,
+                  ease: "easeOut",
+                  delay: Math.random() * 0.5,
+                }}
+              />
+            ))}
+          </Box>
+        )}
+      </AnimatePresence>
+      
+      {/* Adoption Certificate Modal */}
+      <Modal
+        open={showCertificate}
+        onClose={() => setShowCertificate(false)}
+        closeAfterTransition
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 4
+        }}
+      >
+        <Fade in={showCertificate}>
+          <Box sx={{ 
+            maxWidth: '90vw', 
+            maxHeight: '90vh', 
+            overflow: 'auto',
+            backgroundColor: 'white',
+            borderRadius: 2,
+            p: 2
+          }}>
+            <AdoptionCertificate 
+              pet={pet} 
+              adopter={user} 
+              adoptionDate={pet?.adoptionDate || new Date()} 
+            />
+          </Box>
+        </Fade>
+      </Modal>
     </>
   );
 };
